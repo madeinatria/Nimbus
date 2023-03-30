@@ -24,8 +24,8 @@ type Card string
 
 const (
 	Basic    string = "Basic"
-	Premium         = "Premium"
-	Platinum        = "Platinum"
+	Premium  string = "Premium"
+	Platinum string = "Platinum"
 )
 
 type Offers struct {
