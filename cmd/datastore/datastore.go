@@ -1,8 +1,16 @@
 package datastore
 
 import (
+	"fmt"
+	"log"
+
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
+
+var Db *gorm.DB
+var err error
+var dsn string
 
 type Client struct {
 	gorm.Model
@@ -42,4 +50,21 @@ type Transaction struct {
 	Offer  Offers `json:"offer"`
 	Amount uint   `json:"amount"`
 	UserId User   `json:"user"`
+}
+
+func init() {
+
+	// dbLoc := fmt.Sprintf("%s/%s.db", config.Config.SERVICE_DB, config.Config.REGION)
+	dbLoc := fmt.Sprintf("nimbus.db")
+	Db, err = gorm.Open(sqlite.Open(dbLoc), &gorm.Config{})
+
+	if err != nil {
+		log.Panicln("failed to establish error db connection")
+	}
+	log.Println("db conn")
+
+	Db.AutoMigrate(&Client{})
+	Db.AutoMigrate(&User{})
+	Db.AutoMigrate(&Offers{})
+	Db.AutoMigrate(&Transaction{})
 }
