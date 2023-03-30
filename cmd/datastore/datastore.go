@@ -15,12 +15,20 @@ type Client struct {
 	Details    string `json:"details"`
 }
 
+type User struct {
+	gorm.model
+	ID         uint   `gorm:"primaryKey"`
+	Name       string `json:"name"`
+	Phone      string `json:"phone"`
+	Details    string `json:"details"`
+}
+
 type Card string
 
 const (
-	Basic Card = iota
-	Premium
-	Platinum
+	Basic string = "Basic"
+	Premium      = "Premium"
+	Platinum     = "Platinum"
 )
 
 type Offers struct {
@@ -31,5 +39,11 @@ type Offers struct {
 	Client        Client `json:"client"`
 }
 
-
+type Transaction struct {
+	gorm.model
+	ID            uint   `gorm:"primaryKey"`
+	Offer         Offers `json:"offer"`
+	Amount        uint `json:"amount"`
+	UserId        User `json:"user"`
+}
 
