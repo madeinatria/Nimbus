@@ -12,6 +12,7 @@ var Db *gorm.DB
 var err error
 var dsn string
 
+// rest
 type Client struct {
 	gorm.Model
 	ID      uint   `gorm:"primaryKey"`
