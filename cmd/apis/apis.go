@@ -7,6 +7,10 @@ func TempHandler(ctx *gin.Context) {
 
 }
 
+func SignUp(ctx *gin.Context) {
+	ctx.JSON(200, gin.H{"msg": "home route"})
+}
+
 func InitLogin(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{"msg": "home route"})
 }

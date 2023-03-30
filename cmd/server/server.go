@@ -22,6 +22,9 @@ func setupApi(router *gin.Engine) {
 		})
 
 		// posts phonenumber and responds back with OTP
+		api.POST("/signUp", apis.SignUp)
+
+		// posts phonenumber and responds back with OTP
 		api.POST("/initLogin", apis.InitLogin)
 
 		// validates creds (phoneNumber and OTP) and responds back with auth token
