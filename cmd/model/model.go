@@ -4,25 +4,25 @@ import "github.com/madeinatria/Nimbus/cmd/datastore"
 
 type SignUpPayload struct {
 	datastore.Client
-	Type string `json:"type"`
+	Type string `json:"type" binding:"required"`
 }
 
 type InitLoginPayload struct {
-	Phone string `json:"phone"`
+	Phone string `json:"phone" binding:"required"`
 }
 
 type LoginPayload struct {
-	Phone string `json:"phone"`
-	UUID  string `json:"uuid"`
-	OTP   string `json:"otp"`
+	Phone string `json:"phone" binding:"required"`
+	UUID  string `json:"uuid" binding:"required"`
+	OTP   string `json:"otp" binding:"required"`
 }
 
 type InitOfferPayload struct {
-	User string `json:"user"`
+	User string `json:"user" binding:"required"`
 }
 
 type ReedemOfferPayload struct {
-	UserId string `json:"user_id"`
-	Amount string `json:"amount"`
-	OTP    string `json:"otp"`
+	UserId string `json:"user_id" binding:"required"`
+	Amount string `json:"amount" binding:"required"`
+	OTP    string `json:"otp" binding:"required"`
 }

@@ -12,21 +12,27 @@ var Db *gorm.DB
 var err error
 var dsn string
 
+type KeyPair struct {
+	Nonce string `json:"nonce"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 // rest
 type Client struct {
 	gorm.Model
 	ID      uint   `gorm:"primaryKey"`
-	Name    string `json:"name"`
-	Phone   string `json:"phone"`
-	Details string `json:"details"`
+	Name    string `json:"name" binding:"required"`
+	Phone   string `json:"phone" binding:"required" gorm:"index:idx_phone,unique"`
+	Details string `json:"details" binding:"required"`
 }
 
 type User struct {
 	gorm.Model
 	ID      uint   `gorm:"primaryKey"`
-	Name    string `json:"name"`
-	Phone   string `json:"phone"`
-	Details string `json:"details"`
+	Name    string `json:"name" binding:"required"`
+	Phone   string `json:"phone" binding:"required" gorm:"index:idx_phone,unique"`
+	Details string `json:"details" binding:"required"`
 }
 
 type Card string
@@ -68,4 +74,5 @@ func init() {
 	Db.AutoMigrate(&User{})
 	Db.AutoMigrate(&Offers{})
 	Db.AutoMigrate(&Transaction{})
+	Db.AutoMigrate(&KeyPair{})
 }

@@ -1,11 +1,15 @@
 package apis
 
 import (
+	"errors"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/madeinatria/Nimbus/cmd/datastore"
 	"github.com/madeinatria/Nimbus/cmd/model"
+	nimbusUtils "github.com/madeinatria/Nimbus/cmd/utils"
+	"gorm.io/gorm"
 )
 
 func TempHandler(ctx *gin.Context) {
@@ -14,12 +18,12 @@ func TempHandler(ctx *gin.Context) {
 }
 
 func SignUp(ctx *gin.Context) {
+
 	var payload model.SignUpPayload
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-
 	if payload.Type == "client" {
 		cli := datastore.Client{
 			Name:    payload.Name,
@@ -27,14 +31,14 @@ func SignUp(ctx *gin.Context) {
 			Details: payload.Details,
 		}
 		result := datastore.Db.Create(&cli)
-
 		if result.Error != nil {
-			// err
+			ctx.JSON(http.StatusBadRequest, gin.H{"msg": result.Error.Error()})
+			return
 		}
-
 		ctx.JSON(200, gin.H{"msg": "user created"})
 		return
 	}
+
 	if payload.Type == "user" {
 		cli := datastore.User{
 			Name:    payload.Name,
@@ -42,17 +46,14 @@ func SignUp(ctx *gin.Context) {
 			Details: payload.Details,
 		}
 		result := datastore.Db.Create(&cli)
-
 		if result.Error != nil {
-			// err
+			ctx.JSON(http.StatusBadRequest, gin.H{"msg": result.Error.Error()})
+			return
 		}
-
-		ctx.JSON(200, gin.H{"msg": "user created"})
+		ctx.JSON(http.StatusOK, gin.H{"msg": "user created"})
 		return
-
 	}
-
-	// ctx.JSON(200, gin.H{"msg": "home route"})
+	ctx.JSON(http.StatusBadRequest, gin.H{"msg": "invalid request"})
 }
 
 func InitLogin(ctx *gin.Context) {
@@ -63,9 +64,39 @@ func InitLogin(ctx *gin.Context) {
 		return
 	}
 
-	// trigger otp
-	// respond with uuid
-	ctx.JSON(200, gin.H{"msg": "home route"})
+	var client datastore.Client
+	findPhErr := datastore.Db.Model(&datastore.Client{}).Where("phone = ?", payload.Phone).First(&client)
+	if errors.Is(findPhErr.Error, gorm.ErrRecordNotFound) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"msg": "phone number not found"})
+		return
+	}
+
+	log.Println("identified user : ", client.Name)
+
+	genOtp, errOtp := nimbusUtils.GenerateOTP()
+	if errOtp != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "error in otp gen"})
+		return
+	}
+
+	genNonce, errNonce := nimbusUtils.GenerateNonce()
+	if errNonce != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "error in nonce gen"})
+		return
+	}
+
+	// persist OTP
+	result := datastore.Db.Create(&datastore.KeyPair{
+		Nonce: genNonce,
+		Key:   client.Phone,
+		Value: genOtp,
+	})
+
+	if result.Error != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "could not initLogin"})
+		return
+	}
+	ctx.JSON(200, gin.H{"otp": genOtp, "nonce": genNonce})
 }
 
 func Login(ctx *gin.Context) {
@@ -75,8 +106,19 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	// do validation and respond token
-	ctx.JSON(200, gin.H{"msg": "home route"})
+	var OTPEntry datastore.KeyPair
+	result := datastore.Db.Model(&datastore.KeyPair{}).Where("nonce = ?", payload.UUID).First(&OTPEntry)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"msg": "otp entry not found"})
+		return
+	}
+
+	if OTPEntry.Key == payload.Phone && OTPEntry.Value == payload.OTP {
+		ctx.JSON(http.StatusOK, gin.H{"msg": "logged in return with token may be ?"})
+		return
+	}
+
+	ctx.JSON(http.StatusBadRequest, gin.H{"msg": "invalid state"})
 }
 
 func InitRedeemOffer(ctx *gin.Context) {
