@@ -13,12 +13,12 @@ type InitLoginPayload struct {
 
 type LoginPayload struct {
 	Phone string `json:"phone" binding:"required"`
-	UUID  string `json:"uuid" binding:"required"`
+	Nonce string `json:"nonce" binding:"required"`
 	OTP   string `json:"otp" binding:"required"`
 }
 
 type InitOfferPayload struct {
-	User string `json:"user" binding:"required"`
+	Phone string `json:"phone" binding:"required"`
 }
 
 type ReedemOfferPayload struct {

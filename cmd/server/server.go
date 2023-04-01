@@ -9,8 +9,8 @@ import (
 
 func Start() {
 	router := gin.New()
-	setupApi(router)
 
+	setupApi(router)
 	router.Run(fmt.Sprintf(":%s", "8081"))
 }
 
@@ -37,6 +37,16 @@ func setupApi(router *gin.Engine) {
 		// validates qr data and AMOUNT with OTP
 		// Update db and send confirmation SMS
 		api.POST("/redeemOffer", apis.RedeemOffer)
+
+		// offer apis - create offer
+		// api.GET("/getOffer", apis.OffersHandler)
+		// api.POST("/createOffer", apis.OffersHandler)
+		// api.PATCH("/updateOffer", apis.OffersHandler)
+		// api.DELETE("/deleteOffer", apis.OffersHandler)
+
+		// premium - rate - restaurant
+
+		// transaction api - get all
 
 		/*	python base - apis
 			@app.get("/api/v1/user")
